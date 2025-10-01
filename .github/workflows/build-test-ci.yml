@@ -1,0 +1,32 @@
+name: Reusable Application CI Check
+
+on:
+  # This workflow is only callable by other workflows
+  workflow_call:
+
+jobs:
+  app_ci:
+    name: Build & Test Application
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Set up Node environment (matching the version in the Dockerfile build stage)
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install Application Dependencies
+        run: npm install
+
+      # Run the production build. This confirms the application can be packaged.
+      - name: Run Production Build (npm run build)
+        run: npm run build
+
+      - name: Run Unit and Integration Tests
+        # The step will fail if tests do not pass (exit code 0 is required for success)
+        run: npm test

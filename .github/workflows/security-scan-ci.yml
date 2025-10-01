@@ -1,0 +1,35 @@
+name: Reusable Trivy Security Scan
+
+on:
+  workflow_call:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set Image Variable
+        id: image_tag
+        run: echo "IMAGE_TAG=image-test:${{ github.sha }}" >> $GITHUB_OUTPUT
+
+      # The build step must include 'load: true' to make the image available for the Trivy scan
+      - name: Build Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: ${{ steps.image_tag.outputs.IMAGE_TAG }}
+          load: true
+      - name: Trivy Vulnerability Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.image_tag.outputs.IMAGE_TAG }}
+          format: "table"
+          # Fail the build if any Critical or High severity vulnerability is found
+          exit-code: "1"
+          ignore-unfixed: true
+          severity: "CRITICAL,HIGH"
