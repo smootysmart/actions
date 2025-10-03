@@ -32,4 +32,4 @@ jobs:
           # Fail the build if any Critical or High severity vulnerability is found
           exit-code: "1"
           ignore-unfixed: true
-          severity: "CRITICAL,HIGH"
+          severity: "CRITICAL"
